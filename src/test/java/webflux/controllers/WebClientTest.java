@@ -1,15 +1,10 @@
 package webflux.controllers;
 
-
 import static webflux.controllers.PingController.TEST_MESSAGE;
 
-import java.util.Collections;
-
-import org.junit.Before;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -62,5 +57,20 @@ import webflux.config.AppConfig;
                     .verifyComplete();
         }
 
+        //@Disabled
+        @Test
+        public void testWebClient() {
+            log.info("testWebClient started");
+            Mono<String> msg = webClient.get()
+                    .uri("/test/webclient")
+                    .accept(MediaType.APPLICATION_ATOM_XML)
+                    .retrieve()
+                    .bodyToMono(String.class);
+
+            StepVerifier.create(msg)
+                    .expectNext(TEST_MESSAGE)
+                    .verifyComplete();
+            log.info("testWebClient completed");
+        }
     }
 

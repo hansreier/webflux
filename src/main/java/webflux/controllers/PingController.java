@@ -37,12 +37,16 @@ public class PingController {
 
     @GetMapping(path = "/webclient")
     public Mono<String> getWebclient() {
+        log.info("Mono REST service using webclient");
+
         WebClient webClient = WebClient.create();
+        log.info("webClient created");
         Flux<String> msg = webClient.get()
-                .uri("/test/flux")
+                .uri("localhost:8080/test/flux")
                 .accept(MediaType.APPLICATION_ATOM_XML)
                 .retrieve()
                 .bodyToFlux(String.class);
+        log.info("Mone REST service called and result returned");
         return Mono.from(msg);
     }
 }
