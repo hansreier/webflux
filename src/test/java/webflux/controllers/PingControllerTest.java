@@ -67,8 +67,8 @@ public class PingControllerTest {
     public void testFluxEndpoint() {
         Flux<String> msg = webTestClient.get()
                 .uri("/test/flux")
-                //.accept(MediaType.APPLICATION_ATOM_XML)
-                .accept(MediaType.APPLICATION_STREAM_JSON)
+                .accept(MediaType.APPLICATION_ATOM_XML)
+                //.accept(MediaType.APPLICATION_STREAM_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(String.class).getResponseBody()
