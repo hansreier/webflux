@@ -1,6 +1,7 @@
 package webflux.controllers;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -23,7 +24,7 @@ import static webflux.controllers.PingController.TEST_MESSAGE;
 
 //@ExtendWith(SpringExtension.class) //Required in this case?
 //@DirtiesContext ??? recreate context for every method
-@AutoConfigureWebTestClient
+@AutoConfigureWebTestClient(timeout = "36000")
 @ContextConfiguration(classes = AppConfig.class)
 // @ActiveProfiles(SpringProfiles.TEST)
 @Slf4j
@@ -77,8 +78,10 @@ public class PingControllerTest {
     }
 
     //Run this or localhost:8080/test/flux
+    //@Disabled
     @Test
     public void testWebClientEndpoint() {
+        log.info("test start");
         Flux<String> msg = webTestClient.get()
                 .uri("/test/webclient")
                 .accept(MediaType.APPLICATION_ATOM_XML)
@@ -90,6 +93,8 @@ public class PingControllerTest {
         StepVerifier.create(msg)
                 .expectNext(TEST_MESSAGE)
                 .verifyComplete();
+
+                log.info("call completed");
     }
 
     /*

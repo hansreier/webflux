@@ -2,12 +2,14 @@ package webflux.controllers;
 
 import static webflux.controllers.PingController.TEST_MESSAGE;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +32,6 @@ import webflux.config.AppConfig;
              webClient = WebClient.create("http://localhost:8080");
         }
 
-        //@Disabled
         @Test
         public void testMonoEndpoint() {
             Mono<String> msg = webClient.get()
@@ -43,7 +44,6 @@ import webflux.config.AppConfig;
                     .verifyComplete();
         }
 
-        //@Disabled
         @Test
         public void testFluxEndpoint() {
             Flux<String> msg = webClient.get()
@@ -57,19 +57,17 @@ import webflux.config.AppConfig;
                     .verifyComplete();
         }
 
-        //@Disabled
         @Test
         public void testWebClient() {
             log.info("testWebClient started");
-            Mono<String> msg = webClient.get()
+            Flux<String> msg = webClient.get()
                     .uri("/test/webclient")
                     .accept(MediaType.APPLICATION_ATOM_XML)
-                    .retrieve()
-                    .bodyToMono(String.class);
+                    .retrieve().bodyToFlux(String.class);
 
-            StepVerifier.create(msg)
-                    .expectNext(TEST_MESSAGE)
-                    .verifyComplete();
+            log.info("testWebClient call completed");
+            String result = msg.blockLast();
+            Assertions.assertEquals(result,TEST_MESSAGE);
             log.info("testWebClient completed");
         }
     }
