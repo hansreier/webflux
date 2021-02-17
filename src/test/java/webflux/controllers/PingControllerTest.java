@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -17,6 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 import webflux.config.AppConfig;
+import webflux.config.AppTestConfig;
 import webflux.logback.LogbackSupport;
 import webflux.logback.LogbackTestSupport;
 
@@ -28,11 +30,13 @@ import static webflux.controllers.PingController.TEST_MESSAGE;
 @ContextConfiguration(classes = AppConfig.class)
 // @ActiveProfiles(SpringProfiles.TEST)
 @Slf4j
+@Import(AppTestConfig.class)
 @WebFluxTest
 public class PingControllerTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
 
     @Test
     public void dummyTest() {
@@ -63,7 +67,8 @@ public class PingControllerTest {
     public void testFluxEndpoint() {
         Flux<String> msg = webTestClient.get()
                 .uri("/test/flux")
-                .accept(MediaType.APPLICATION_ATOM_XML)
+                //.accept(MediaType.APPLICATION_ATOM_XML)
+                .accept(MediaType.APPLICATION_STREAM_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(String.class).getResponseBody()

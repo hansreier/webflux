@@ -78,6 +78,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <resources>
+                    <resource>
+                        <directory>resources</directory>
+                    </resource>
+                </resources>
+            </plugin>
         </plugins>
     </build>
 </project>

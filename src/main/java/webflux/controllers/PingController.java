@@ -15,19 +15,21 @@ import java.time.Duration;
 public class PingController {
     public static final String WELCOME = "Welcome ";
     public static final String TO = "to ";
-    public static final String PEPPOL = "Peppol ";
-    public static final String INTEGRASJON = "Integrasjon ";
-    public static final String PAYMENT = "Payment ";
-    public static final String TEST_MESSAGE = WELCOME + TO + PEPPOL + PAYMENT + INTEGRASJON;
+    public static final String WEBFLUX = "WebFlux ";
+    public static final String DEMO = "Demo ";
+    public static final String PROGRAM = "Program ";
+    public static final String TEST_MESSAGE = WELCOME + TO + WEBFLUX + DEMO + PROGRAM;
 
     @GetMapping(path = "/mono")
     public Mono<String> getMono() {
+        log.info("Mono REST service");
         return Mono.just(TEST_MESSAGE);
     }
 
     @GetMapping(path = "/flux", produces = MediaType.APPLICATION_ATOM_XML_VALUE)
     public Flux<String> getFlux() {
-        return Flux.just(WELCOME, TO, PEPPOL, PAYMENT, INTEGRASJON)
+        log.info("Flux REST service");
+        return Flux.just(WELCOME, TO, WEBFLUX, DEMO, PROGRAM)
                 .delayElements(Duration.ofSeconds(1)).log();
     }
 
