@@ -2,14 +2,22 @@ package webflux.controllers;
 
 import static webflux.controllers.PingController.TEST_MESSAGE;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
+import static webflux.controllers.PingController.USER_ID_PREFIX;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +26,10 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import webflux.config.AppConfig;
 
+import java.io.File;
 
-    //@DirtiesContext ??? recreate context for every method
+
+//@DirtiesContext ??? recreate context for every method
     @ContextConfiguration(classes = AppConfig.class)
     //@ActiveProfiles(SpringProfiles.DEFAULT)
     @Slf4j
@@ -67,8 +77,54 @@ import webflux.config.AppConfig;
 
             log.info("testWebClient call completed");
             String result = msg.blockLast();
-            Assertions.assertEquals(result,TEST_MESSAGE);
+            assertThat(msg.blockLast()).isEqualTo(TEST_MESSAGE);
             log.info("testWebClient completed");
         }
+
+        @Test
+        @EnabledIfEnvironmentVariable(named ="spring.profiles.active", matches ="(ITEST)")
+        public void testUserEndpoint() {
+            String user = "Reier";
+            Mono<String> msg =
+                    webClient.post()
+                            .uri("/test/user").contentType(MediaType.valueOf(MediaType.APPLICATION_XML_VALUE))
+                            .accept(MediaType.APPLICATION_ATOM_XML)
+                            .body(Mono.just(user), String.class)
+                            .retrieve()
+                            .bodyToMono(String.class).log();
+
+            String userId = msg.block();
+            log.info("UserId: {}", userId);
+            assertThat(userId).startsWith(USER_ID_PREFIX + user);
+        }
+
+        @Test
+        @EnabledIfEnvironmentVariable(named ="spring.profiles.active", matches ="(ITEST)")
+        public void testFileUpload() {
+            log.info("Test web client for file upload started");
+            String fileName = "Betaling.txt";
+            ClassLoader classLoader = getClass().getClassLoader();
+            File file = new File(classLoader.getResource(fileName).getFile());
+            log.info("Fil opprettet ");
+            Flux<String> msg =
+                    webClient.post()
+                            .uri("/test/upload").contentType(MediaType.valueOf(MediaType.APPLICATION_XML_VALUE))
+                            .accept(MediaType.MULTIPART_FORM_DATA)
+                            .body(BodyInserters.fromMultipartData(fromFile(file)))
+                            .retrieve()
+                            .bodyToFlux(String.class);
+
+            String result = msg.blockLast();
+        }
+
+        private MultiValueMap<String, HttpEntity<?>> fromFile(File file) {
+            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+            builder.part("file", new FileSystemResource(file));
+            return builder.build();
+        }
+
+
+
+
     }
 

@@ -11,7 +11,7 @@ logging:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
-    org.springframework: DEBUG
+    org.springframework: INFO
     webflux: DEBUG
 
 

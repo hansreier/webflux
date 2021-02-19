@@ -1,32 +1,38 @@
 package webflux.controllers;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import webflux.config.AppConfig;
 import webflux.config.AppTestConfig;
 import webflux.logback.LogbackSupport;
 import webflux.logback.LogbackTestSupport;
 
-import static webflux.controllers.PingController.TEST_MESSAGE;
+import java.io.File;
 
-//@ExtendWith(SpringExtension.class) //Required in this case?
+import static webflux.controllers.PingController.TEST_MESSAGE;
+import static webflux.controllers.PingController.USER_ID_PREFIX;
+
 //@DirtiesContext ??? recreate context for every method
 @AutoConfigureWebTestClient(timeout = "36000")
 @ContextConfiguration(classes = AppConfig.class)
-// @ActiveProfiles(SpringProfiles.TEST)
 @Slf4j
 @Import(AppTestConfig.class)
 @WebFluxTest
@@ -38,7 +44,7 @@ public class PingControllerTest {
 
     @Test
     public void dummyTest() {
-        Assertions.assertEquals("OK", LogbackTestSupport.verifyLogbackConfig());
+        assertThat(LogbackTestSupport.verifyLogbackConfig()).isEqualTo("OK");
         LogbackSupport.outputLogbackConfig();
         log.info("Test runs without breaking the Spring Context");
     }
@@ -94,8 +100,48 @@ public class PingControllerTest {
                 .expectNext(TEST_MESSAGE)
                 .verifyComplete();
 
-                log.info("call completed");
+                log.info("test completed");
     }
+
+    @Test
+    public void testUserEndpoint() {
+        String user = "Reier";
+        Flux<String> msg =
+                webTestClient.post().uri("/test/user").contentType(MediaType.valueOf(MediaType.APPLICATION_XML_VALUE))
+                        .body(Mono.just(user), String.class)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .returnResult(String.class).getResponseBody();
+        String userId = msg.blockLast();
+        log.info("UserId: {}", userId);
+        assertThat(userId).startsWith(USER_ID_PREFIX + user);
+    }
+
+    @Test
+    public void testFileUpload() {
+        log.info("Test web client for file upload started");
+        String fileName = "Betaling.txt";
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(fileName).getFile());
+        Flux<String> text =
+                webTestClient.post()
+                        .uri("/test/upload").contentType(MediaType.valueOf(MediaType.APPLICATION_XML_VALUE))
+                        .body(BodyInserters.fromMultipartData(fromFile(file)))
+                        .exchange()
+                        .expectStatus().isOk()
+                        .returnResult(String.class).getResponseBody();
+        // String result = text.blockLast();
+    }
+
+    private MultiValueMap<String, HttpEntity<?>> fromFile(File file) {
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("file", new FileSystemResource(file));
+        return builder.build();
+    }
+
+
+
+
 
     /*
     @Test
