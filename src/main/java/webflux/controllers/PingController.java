@@ -35,7 +35,7 @@ public class PingController {
         return Mono.just(TEST_MESSAGE);
     }
 
-    @GetMapping(path = "/flux", produces = MediaType.APPLICATION_ATOM_XML_VALUE)
+    @GetMapping(path = "/flux", produces = MediaType.APPLICATION_XML_VALUE)
     public Flux<String> getFlux() {
         log.info("Flux REST service");
         return Flux.just(WELCOME, TO, WEBFLUX, DEMO, PROGRAM)
@@ -50,7 +50,7 @@ public class PingController {
         log.info("webClient created");
         Flux<String> msg = webClient.get()
                 .uri("/test/flux")
-                .accept(MediaType.APPLICATION_ATOM_XML)
+                .accept(MediaType.APPLICATION_XML)
                 .retrieve()
                 .bodyToFlux(String.class);
         log.info("Flux REST service called and result returned");
@@ -78,8 +78,6 @@ public class PingController {
     @ResponseStatus(value = HttpStatus.OK)
     public Flux<String> upload( @Validated @RequestPart("file") Mono<FilePart> filePartMono) {
         log.info("Starting file upload");
-        filePartMono.log();
-        log.info("Reier");
         Flux<String> result = filePartMono.flatMapMany(x -> {
             log.info("filename: {}",x.filename());
             return x.content()
@@ -88,7 +86,7 @@ public class PingController {
                     dataBuffer.read(bytes);
                     DataBufferUtils.release(dataBuffer);
                     String read = new String(bytes, StandardCharsets.UTF_8);
-                    log.info("Reier read: {}",read);
+                    log.info("read: {}",read);
                     return read;
                 }); });
 

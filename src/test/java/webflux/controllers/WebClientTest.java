@@ -46,6 +46,7 @@ import java.io.File;
         public void testMonoEndpoint() {
             Mono<String> msg = webClient.get()
                     .uri("/test/mono")
+                    .accept(MediaType.APPLICATION_XML)
                     .retrieve()
                     .bodyToMono(String.class).log();
 
@@ -58,7 +59,7 @@ import java.io.File;
         public void testFluxEndpoint() {
             Flux<String> msg = webClient.get()
                     .uri("/test/flux")
-                    .accept(MediaType.APPLICATION_ATOM_XML)
+                    .accept(MediaType.APPLICATION_XML)
                     .retrieve()
                     .bodyToFlux(String.class);
 
@@ -72,7 +73,7 @@ import java.io.File;
             log.info("testWebClient started");
             Flux<String> msg = webClient.get()
                     .uri("/test/webclient")
-                    .accept(MediaType.APPLICATION_ATOM_XML)
+                    .accept(MediaType.APPLICATION_XML)
                     .retrieve().bodyToFlux(String.class);
 
             log.info("testWebClient call completed");
@@ -82,13 +83,13 @@ import java.io.File;
         }
 
         @Test
-        @EnabledIfEnvironmentVariable(named ="spring.profiles.active", matches ="(ITEST)")
+        //@EnabledIfEnvironmentVariable(named ="spring.profiles.active", matches ="(ITEST)")
         public void testUserEndpoint() {
             String user = "Reier";
             Mono<String> msg =
                     webClient.post()
                             .uri("/test/user").contentType(MediaType.valueOf(MediaType.APPLICATION_XML_VALUE))
-                            .accept(MediaType.APPLICATION_ATOM_XML)
+                            .accept(MediaType.APPLICATION_XML)
                             .body(Mono.just(user), String.class)
                             .retrieve()
                             .bodyToMono(String.class).log();
@@ -99,7 +100,7 @@ import java.io.File;
         }
 
         @Test
-        @EnabledIfEnvironmentVariable(named ="spring.profiles.active", matches ="(ITEST)")
+        //@EnabledIfEnvironmentVariable(named ="spring.profiles.active", matches ="(ITEST)")
         public void testFileUpload() {
             log.info("Test web client for file upload started");
             String fileName = "Betaling.txt";
@@ -110,7 +111,7 @@ import java.io.File;
                     webClient.post()
                             .uri("/test/upload")
                             .contentType(MediaType.MULTIPART_FORM_DATA)
-                            //.accept(MediaType.MULTIPART_FORM_DATA)
+                            .accept(MediaType.APPLICATION_XML)
                             .body(BodyInserters.fromMultipartData(fromFile(file)))
                             .retrieve()
                             .bodyToFlux(String.class);
