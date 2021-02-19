@@ -76,15 +76,21 @@ public class PingController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseStatus(value = HttpStatus.OK)
-    public Flux<String> upload( @Validated @RequestPart("file) ") Mono<FilePart> filePartMono) {
+    public Flux<String> upload( @Validated @RequestPart("file") Mono<FilePart> filePartMono) {
         log.info("Starting file upload");
-        Flux<String> result = filePartMono.flatMapMany(x -> x.content()
+        filePartMono.log();
+        log.info("Reier");
+        Flux<String> result = filePartMono.flatMapMany(x -> {
+            log.info("filename: {}",x.filename());
+            return x.content()
                 .map(dataBuffer -> {
                     byte[] bytes = new byte[dataBuffer.readableByteCount()];
                     dataBuffer.read(bytes);
                     DataBufferUtils.release(dataBuffer);
-                    return new String(bytes, StandardCharsets.UTF_8);
-                }));
+                    String read = new String(bytes, StandardCharsets.UTF_8);
+                    log.info("Reier read: {}",read);
+                    return read;
+                }); });
 
         //try {
         //    saveFile(result);

@@ -125,12 +125,14 @@ public class PingControllerTest {
         File file = new File(classLoader.getResource(fileName).getFile());
         Flux<String> text =
                 webTestClient.post()
-                        .uri("/test/upload").contentType(MediaType.valueOf(MediaType.APPLICATION_XML_VALUE))
+                        .uri("/test/upload")
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
                         .body(BodyInserters.fromMultipartData(fromFile(file)))
                         .exchange()
                         .expectStatus().isOk()
                         .returnResult(String.class).getResponseBody();
-        // String result = text.blockLast();
+         String result = text.blockFirst();
+         log.info(result);
     }
 
     private MultiValueMap<String, HttpEntity<?>> fromFile(File file) {

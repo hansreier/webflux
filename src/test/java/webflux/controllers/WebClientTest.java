@@ -108,8 +108,9 @@ import java.io.File;
             log.info("Fil opprettet ");
             Flux<String> msg =
                     webClient.post()
-                            .uri("/test/upload").contentType(MediaType.valueOf(MediaType.APPLICATION_XML_VALUE))
-                            .accept(MediaType.MULTIPART_FORM_DATA)
+                            .uri("/test/upload")
+                            .contentType(MediaType.MULTIPART_FORM_DATA)
+                            //.accept(MediaType.MULTIPART_FORM_DATA)
                             .body(BodyInserters.fromMultipartData(fromFile(file)))
                             .retrieve()
                             .bodyToFlux(String.class);
