@@ -27,7 +27,7 @@ public class PingController {
     public static final String DEMO = "Demo ";
     public static final String PROGRAM = "Program ";
     public static final String TEST_MESSAGE = WELCOME + TO + WEBFLUX + DEMO + PROGRAM;
-    public static final String USER_ID_PREFIX ="ciber";
+    public static final String USER_ID_PREFIX = "ciber";
 
     @GetMapping(path = "/mono")
     public Mono<String> getMono() {
@@ -35,7 +35,7 @@ public class PingController {
         return Mono.just(TEST_MESSAGE);
     }
 
-    @GetMapping(path = "/flux", produces = MediaType.APPLICATION_XML_VALUE)
+    @GetMapping(path = "/flux", produces = MediaType.APPLICATION_ATOM_XML_VALUE)
     public Flux<String> getFlux() {
         log.info("Flux REST service");
         return Flux.just(WELCOME, TO, WEBFLUX, DEMO, PROGRAM)
@@ -76,19 +76,20 @@ public class PingController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseStatus(value = HttpStatus.OK)
-    public Flux<String> upload( @Validated @RequestPart("file") Mono<FilePart> filePartMono) {
+    public Flux<String> upload(@Validated @RequestPart("file") Mono<FilePart> filePartMono) {
         log.info("Starting file upload");
         Flux<String> result = filePartMono.flatMapMany(x -> {
-            log.info("filename: {}",x.filename());
+            log.info("filename: {}", x.filename());
             return x.content()
-                .map(dataBuffer -> {
-                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                    dataBuffer.read(bytes);
-                    DataBufferUtils.release(dataBuffer);
-                    String read = new String(bytes, StandardCharsets.UTF_8);
-                    log.info("read: {}",read);
-                    return read;
-                }); });
+                    .map(dataBuffer -> {
+                        byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                        dataBuffer.read(bytes);
+                        DataBufferUtils.release(dataBuffer);
+                        String read = new String(bytes, StandardCharsets.UTF_8);
+                        log.info("read: {}", read);
+                        return read;
+                    });
+        });
 
         //try {
         //    saveFile(result);
