@@ -1,122 +1,115 @@
 package webflux.controllers;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.buffer.DataBufferUtils;
+import org.junit.platform.commons.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import webflux.service.FileService;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Random;
 
-import static webflux.controllers.SendPaymentController.RANDOM_UPPER_LIMIT;
-
 @RestController
 @RequestMapping("/test")
-@Slf4j
 public class PingController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PingController.class);
+
     public static final String WELCOME = "Welcome ";
     public static final String TO = "to ";
-    public static final String WEBFLUX = "WebFlux ";
-    public static final String DEMO = "Demo ";
-    public static final String PROGRAM = "Program ";
-    public static final String TEST_MESSAGE = WELCOME + TO + WEBFLUX + DEMO + PROGRAM;
-    public static final String USER_ID_PREFIX = "ciber";
+    public static final String PEPPOL = "Peppol ";
+    public static final String INTEGRASJON = "Integrasjon ";
+    public static final String PAYMENT = "Payment ";
+    public static final String TEST_MESSAGE = WELCOME + TO + PEPPOL + PAYMENT + INTEGRASJON;
+    public static final String USER_ID_PREFIX = "skatt";
+    public static final int LINE_FEED = 10;
+    public static final int RANDOM_UPPER_LIMIT = 100;
+    private static final int HUNDRED = 100;
+
+    @Autowired
+    private FileService fileService;
 
     @GetMapping(path = "/mono")
     public Mono<String> getMono() {
-        log.info("Mono REST service");
         return Mono.just(TEST_MESSAGE);
     }
 
     @GetMapping(path = "/flux", produces = MediaType.APPLICATION_ATOM_XML_VALUE)
     public Flux<String> getFlux() {
-        log.info("Flux REST service");
-        return Flux.just(WELCOME, TO, WEBFLUX, DEMO, PROGRAM)
+        return Flux.just(WELCOME, TO, PEPPOL, PAYMENT, INTEGRASJON)
                 .delayElements(Duration.ofSeconds(1)).log();
     }
 
+    /*
+     *   Uses webclient to call a test service
+     *   Obviously, this call only works locally
+     */
     @GetMapping(path = "/webclient")
     public Flux<String> getWebclient() {
-        log.info("Flux REST service using webclient");
-
+        LOG.info("Flux REST service using webclient");
         WebClient webClient = WebClient.create("http://localhost:8080");
-        log.info("webClient created");
+        LOG.info("Webclient created");
         Flux<String> msg = webClient.get()
-                .uri("/test/flux")
-                .accept(MediaType.APPLICATION_XML)
+                .uri("localhost:8080/test/flux")
+                .accept(MediaType.APPLICATION_ATOM_XML)
                 .retrieve()
-                .bodyToFlux(String.class);
-        log.info("Flux REST service called and result returned");
+                .bodyToFlux(String.class)
+                .doOnError(throwable -> LOG.error("Failure", throwable))
+                .onErrorReturn("Reierfeil");
+        LOG.info("Flux Rest service called and result returned");
         return msg;
     }
 
     @PostMapping("/user")
     public Mono<String> saveUser(@RequestBody String user) {
-        log.info("Inside saveUser");
+        if (StringUtils.isBlank(user)) {
+            throw new RuntimeException("empty user");
+        }
+        Mono<String> msg;
+        LOG.debug("Inside saveUser");
         Random rand = new Random();
         int uid = rand.nextInt(RANDOM_UPPER_LIMIT);
         String userId = USER_ID_PREFIX + user + uid;
-        return Mono.just(userId);
+        msg = Mono.just(userId);
+        // Specific error handling can be added, not required.
+        // try {
+        // ...
+        // .doOnError(throwable -> LOG.error("Failure", throwable))
+        // .onErrorResume(throwable -> Mono.error(throwable));
+        // } catch (Exception e) {
+        //     LOG.error("Failure",e);
+        //    msg = Mono.error(e);
+        // }
+        return msg;
     }
-    //https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-multipart
-    //https://dzone.com/articles/step-by-step-procedure-of-spring-webflux-multipart
-    //Kan også blande fildata og andre data som JSON, dette er et veldig aktuelt scenario
-    //@PostMapping("/")
-    //public String handle(@RequestPart("meta-data") Part metadata,
-    //    @RequestPart("file-data") FilePart file) {
-    // Dette under stemmer med begge tutorials men likevel returneres  400.
 
+    //upload and return file content in Flux<String>
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_XML_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.OK)
-    public Flux<String> upload(@Validated @RequestPart("file") Mono<FilePart> filePartMono) {
-        log.info("Starting file upload");
-        Flux<String> result = filePartMono.flatMapMany(x -> {
-            log.info("filename: {}", x.filename());
-            return x.content()
-                    .map(dataBuffer -> {
-                        byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                        dataBuffer.read(bytes);
-                        DataBufferUtils.release(dataBuffer);
-                        String read = new String(bytes, StandardCharsets.UTF_8);
-                        log.info("read: {}", read);
-                        return read;
-                    });
-        });
-
-        //try {
-        //    saveFile(result);
-        //} catch (IOException e) {
-        //    e.printStackTrace();
-        //}
-
-        log.info("file upload to server completed");
+    public Flux<String> upload(@RequestPart("file") Mono<FilePart> filePartMono) {
+        Flux<String> result = filePartMono.flatMapMany(fileService::upload);
+        LOG.info("file upload to server completed");
         return result;
     }
-    /*
-    //Save file on disk
-    //https://www.vinsguru.com/reactor-flux-file-reading/
-    // instead of try with resources
-    // This is reactive correct code, but not described correct import for write and close
-    private void saveFile(Flux<String> contents) throws IOException {
-        log.info("Saving file");
-        Path opPath = Paths.get("/tmp/betaling.txt");
-        BufferedWriter bw = Files.newBufferedWriter(opPath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        contents
-            .subscribe(s -> write(bw, s),
-                (e) -> close(bw),  // close file if error / oncomplete
-                () -> close(bw)
-            );
 
+    //Upload and save to disk, bytes written is returned in Flux<Integer>
+    @PostMapping(value = "/uploadToDisk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.OK)
+    public Flux<Integer> uploadToDisk(@RequestPart("file") Mono<FilePart> filePartMono) {
+        LOG.info("inside upload to disk");
+        Flux<Integer> result = filePartMono.flatMapMany(fileService::uploadToDisk);
+        LOG.info("file upload to disk on server completed");
+        return result;
     }
-    */
-
 }
+
 

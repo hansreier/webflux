@@ -1,17 +1,30 @@
 spring:
   profiles:
     active: local
+#  servlet:
+#    multipart:
+#      max-file-size: 10MB
+#      max-request-size: 10MB
+#      resolve-lazily:
+#https://stackoverflow.com/questions/49234757/cannot-get-spring-boot-to-lazily-resolve-a-multipart-file
 
 logging:
+  logback:
+    rollingpolicy:
+      max-size: 50MB
+      max-history: 2
   file:
     name: logs/webflux.log
-    max-size: 50MB
-    max-history: 2
+
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
     org.springframework: INFO
-    webflux: DEBUG
+    webflux: INFO
+
+app:
+  files: "files"
+
 
 

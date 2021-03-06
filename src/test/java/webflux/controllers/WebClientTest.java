@@ -59,7 +59,7 @@ import java.io.File;
         public void testFluxEndpoint() {
             Flux<String> msg = webClient.get()
                     .uri("/test/flux")
-                    .accept(MediaType.APPLICATION_XML)
+                    .accept(MediaType.APPLICATION_ATOM_XML)
                     .retrieve()
                     .bodyToFlux(String.class);
 
@@ -111,7 +111,7 @@ import java.io.File;
                     webClient.post()
                             .uri("/test/upload")
                             .contentType(MediaType.MULTIPART_FORM_DATA)
-                            .accept(MediaType.APPLICATION_XML)
+                            //.accept(MediaType.APPLICATION_ATOM_XML)
                             .body(BodyInserters.fromMultipartData(fromFile(file)))
                             .retrieve()
                             .bodyToFlux(String.class);
