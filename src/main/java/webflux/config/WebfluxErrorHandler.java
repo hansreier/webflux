@@ -2,6 +2,8 @@ package webflux.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -16,11 +18,26 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+/**************************************************************************************
+ * General error handler for all  WebFlux Rest calls
+ *
+ * https://www.baeldung.com/spring-webflux-errors
+ * A different way of doing it, not used
+ * https://medium.com/@akhil.bojedla/exception-handling-spring-webflux-b11647d8608
+ ***************************************************************************************/
 @Component
 @Order(-2)
 public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
+
+    @Value("${server.error.include-stacktrace:}")
+    private String includeStacktrace;
+
+    @Value("${server.error.include-message:}")
+    private String includeMessage;
 
     private static final Logger LOG = LoggerFactory.getLogger(WebfluxErrorHandler.class);
 
@@ -29,35 +46,42 @@ public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
                                ApplicationContext applicationContext,
                                ServerCodecConfigurer configurer) {
         super(errorAttributes, resources, applicationContext);
-        this.setMessageWriters(configurer.getWriters());
+        super.setMessageWriters(configurer.getWriters());
+        super.setMessageReaders(configurer.getReaders());
     }
-    //A different way of doing it
-    //https://medium.com/@akhil.bojedla/exception-handling-spring-webflux-b11647d8608
 
     @Override
     protected RouterFunction<ServerResponse> getRoutingFunction(
             ErrorAttributes errorAttributes) {
-        LOG.info("Inside error handler router function");
         return RouterFunctions.route(
                 RequestPredicates.all(), this::renderErrorResponse);
+
     }
 
     private Mono<ServerResponse> renderErrorResponse(
             ServerRequest request) {
         LOG.info("Inside error handler server response");
-        //Defaults are empty, why?
-        //ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
-        ErrorAttributeOptions options = ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE,
-                ErrorAttributeOptions.Include.STACK_TRACE);
+        String stack = includeStacktrace;
+        // Defaults are empty for some reason, read manually from config
+        // ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
+        // ErrorAttributeOptions options = ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE,
+        //    ErrorAttributeOptions.Include.STACK_TRACE);
+        List<ErrorAttributeOptions.Include> incl = new ArrayList<>();
+        if (includeMessage.equalsIgnoreCase("always")) {
+            incl.add(ErrorAttributeOptions.Include.MESSAGE);
+        }
+        if (includeStacktrace.equalsIgnoreCase("always")) {
+            incl.add(ErrorAttributeOptions.Include.STACK_TRACE);
+        }
+        ErrorAttributeOptions options = ErrorAttributeOptions.of(incl);
         Map<String, Object> errorPropertiesMap = getErrorAttributes(request,
                 options);
-        //HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         HttpStatus httpStatus = HttpStatus.valueOf((int) errorPropertiesMap.get("status"));
-
-        LOG.error("HttpStatus {}", httpStatus);
+        LOG.error("HttpStatus {}: {}", httpStatus, errorPropertiesMap.get("message"));
         return ServerResponse.status(httpStatus)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON) //Why is only JSON supported?
                 .body(BodyInserters.fromValue(errorPropertiesMap));
     }
 }
+
 

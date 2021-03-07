@@ -62,15 +62,21 @@ public class PingController {
                 .retrieve()
                 .bodyToFlux(String.class)
                 .doOnError(throwable -> LOG.error("Failure", throwable))
-                .onErrorReturn("Reierfeil");
+                .onErrorReturn("Webclient cannot be called");
         LOG.info("Flux Rest service called and result returned");
         return msg;
     }
 
     @PostMapping("/user")
     public Mono<String> saveUser(@RequestBody String user) {
+        LOG.info("user Reier {}", user);
         if (StringUtils.isBlank(user)) {
+            LOG.info("Empty user Reier");
             throw new RuntimeException("empty user");
+        }
+        if (user.startsWith("Hans")) {
+            LOG.info("Hans is not my name");
+            throw new RuntimeException("Do not call me Hans");
         }
         Mono<String> msg;
         LOG.debug("Inside saveUser");

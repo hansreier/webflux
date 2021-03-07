@@ -7,7 +7,11 @@ spring:
 #      max-request-size: 10MB
 #      resolve-lazily:
 #https://stackoverflow.com/questions/49234757/cannot-get-spring-boot-to-lazily-resolve-a-multipart-file
-
+server:
+  error:
+    include-exception: true
+    include-message: ALWAYS
+    include-stacktrace: NEVER
 logging:
   logback:
     rollingpolicy:

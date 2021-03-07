@@ -2,6 +2,7 @@ package webflux.controllers;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.*;
 
 import org.slf4j.Logger;
@@ -110,7 +111,7 @@ public class PingControllerTest {
                 .expectNext(TEST_MESSAGE)
                 .verifyComplete();
 
-                LOG.info("test completed");
+        LOG.info("test completed");
     }
 
     @Test
@@ -128,6 +129,20 @@ public class PingControllerTest {
     }
 
     @Test
+    public void testUserEndpointEmptyUser() {
+        String user = "";
+        Flux<String> msg =
+                webTestClient.post().uri("/test/user").contentType(MediaType.valueOf(MediaType.APPLICATION_ATOM_XML_VALUE))
+                        .body(Mono.just(user), String.class)
+                        .exchange()
+                        .expectStatus().is5xxServerError()
+                        .returnResult(String.class).getResponseBody();
+        String errorJSON = msg.blockLast();
+        LOG.info("errorJSON: {}", errorJSON);
+        assertThat(errorJSON).contains("error");
+    }
+
+    @Test
     public void testFileUpload() {
         LOG.info("Test web client for file upload started");
         String fileName = "Betaling.txt";
@@ -140,8 +155,8 @@ public class PingControllerTest {
                         .exchange()
                         .expectStatus().isOk()
                         .returnResult(String.class).getResponseBody();
-         String result = text.blockLast();
-         LOG.info(result);
+        String result = text.blockLast();
+        LOG.info(result);
     }
 
     @Test
@@ -163,7 +178,7 @@ public class PingControllerTest {
         File file = new File(fileName);
         Flux<String> text =
                 webTestClient.post()
-                        .uri("/test/upload")
+                        .uri("/test/uploadToDisk")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .body(BodyInserters.fromMultipartData(fromFile(file)))
                         .exchange()
@@ -226,8 +241,8 @@ public class PingControllerTest {
 
     @Test
     @Disabled
-    public void testFilesSavedUpload()  {
-       int kBytes = 10000;
+    public void testFilesSavedUpload() {
+        int kBytes = 10000;
         List<Flux<Integer>> responses = new ArrayList<>();
         for (int i = 0; i < NO_FILES; i++) {
             LOG.info("Test asyncrounous upload of multiple files");
@@ -241,15 +256,14 @@ public class PingControllerTest {
                             .exchange()
                             .expectStatus().isOk()
                             .returnResult(Integer.class).getResponseBody());
-            LOG.info("Reier: {}",responses.get(i).getClass());
+            LOG.info("Reier: {}", responses.get(i).getClass());
         }
 
-        responses.forEach(( r) -> {
+        responses.forEach((r) -> {
             Integer bytesWritten = r.blockLast();
             assertThat(kBytes * THOUSAND).isEqualTo(bytesWritten);
             LOG.info("File upload completed kBytes: {}", kBytes);
         });
-
 
 
         LOG.info("File upload completed kBytes: {}", kBytes);

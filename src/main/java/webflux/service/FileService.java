@@ -37,6 +37,7 @@ public class FileService {
     }
 
     public Flux<String> upload(FilePart x) {
+        LOG.info("Upload and return contents in Flux<String>");
         Flux<String> dBuffer;
         dBuffer = x.content().map(dataBuffer -> {
             final int size = dataBuffer.readableByteCount();
@@ -44,17 +45,7 @@ public class FileService {
             dataBuffer.read(bytes);
             DataBufferUtils.release(dataBuffer);
             String read = new String(bytes, StandardCharsets.UTF_8);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("bytes read {} {}", size, read);
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    int pos = read.indexOf(LINE_FEED) + 1;
-                    if (pos == HUNDRED - 1) {
-                        pos = 0;
-                    }
-                    LOG.debug("bytes read {} {}", size, read.substring(pos, pos + HUNDRED - 2));
-                }
-            }
+            LOG.debug("bytes read {} {}", size, strip(read));
             return read;
         });
         return dBuffer;
@@ -86,7 +77,7 @@ public class FileService {
 
                 // get the current write offset and increment by the buffer size
                 final int filePartOffset = fileWriteOffset.getAndAdd(size);
-                LOG.debug("processing file part at offset {}", filePartOffset);
+                LOG.debug("processing file part at Roffset {}", filePartOffset);
                 // write the buffer to disk
                 channel.write(byteBuffer, filePartOffset);
                 return filePartOffset + size;

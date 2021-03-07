@@ -29,4 +29,5 @@ hs_err_pid*
 #ignore all target directories
 target/
 files/
+logs/
 BetalingGen*.txt
