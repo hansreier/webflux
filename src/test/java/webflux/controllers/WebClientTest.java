@@ -8,32 +8,31 @@ import static org.assertj.core.api.Assertions.*;
 import static webflux.controllers.PingController.USER_ID_PREFIX;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.test.context.ActiveProfiles;
+
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import webflux.config.AppConfig;
 
 import java.io.File;
 
 
 //@DirtiesContext ??? recreate context for every method
-    @ContextConfiguration(classes = AppConfig.class)
+    @ContextConfiguration(classes = WebClientTest.class)
     //@ActiveProfiles(SpringProfiles.DEFAULT)
-    @Slf4j
     public class WebClientTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WebClientTest.class);
 
         private WebClient webClient;
 
@@ -70,16 +69,16 @@ import java.io.File;
 
         @Test
         public void testWebClient() {
-            log.info("testWebClient started");
+            LOG.info("testWebClient started");
             Flux<String> msg = webClient.get()
                     .uri("/test/webclient")
                     .accept(MediaType.APPLICATION_XML)
                     .retrieve().bodyToFlux(String.class);
 
-            log.info("testWebClient call completed");
+            LOG.info("testWebClient call completed");
             String result = msg.blockLast();
             assertThat(msg.blockLast()).isEqualTo(TEST_MESSAGE);
-            log.info("testWebClient completed");
+            LOG.info("testWebClient completed");
         }
 
         @Test
@@ -95,18 +94,18 @@ import java.io.File;
                             .bodyToMono(String.class).log();
 
             String userId = msg.block();
-            log.info("UserId: {}", userId);
+            LOG.info("UserId: {}", userId);
             assertThat(userId).startsWith(USER_ID_PREFIX + user);
         }
 
         @Test
         //@EnabledIfEnvironmentVariable(named ="spring.profiles.active", matches ="(ITEST)")
         public void testFileUpload() {
-            log.info("Test web client for file upload started");
+            LOG.info("Test web client for file upload started");
             String fileName = "Betaling.txt";
             ClassLoader classLoader = getClass().getClassLoader();
             File file = new File(classLoader.getResource(fileName).getFile());
-            log.info("Fil opprettet ");
+            LOG.info("Fil opprettet ");
             Flux<String> msg =
                     webClient.post()
                             .uri("/test/upload")

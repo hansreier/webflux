@@ -3,6 +3,8 @@ package webflux.controllers;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -24,8 +25,9 @@ import reactor.core.publisher.Mono;
 // TODO Should be simplifie
 @RestController
 @RequestMapping("/utbetaling")
-@Slf4j
 public class SendPaymentController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SendPaymentController.class);
 
     public static final int RANDOM_UPPER_LIMIT = 100;
 
@@ -50,7 +52,7 @@ public class SendPaymentController {
 
     @PostMapping("/users")
     public Mono<String> saveUser(@RequestBody String user) {
-        log.info("Inside saveUser");
+        LOG.info("Inside saveUser");
         Random rand = new Random();
         int uid = rand.nextInt(RANDOM_UPPER_LIMIT);
         String userId = user + uid;

@@ -93,8 +93,8 @@ public class PingControllerTest {
                 .verifyComplete();
     }
 
-    //Run this or localhost:8080/test/flux
-    //@Disabled
+    //Run this on localhost:8080/test/flux
+    @Disabled
     @Test
     public void testWebClientEndpoint() {
         LOG.info("test start");

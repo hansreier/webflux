@@ -2,7 +2,8 @@ package webflux.logback;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.util.StatusPrinter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /***********************************************************************************
  * Helper class for logback
@@ -13,20 +14,22 @@ import lombok.extern.slf4j.Slf4j;
  * console log and file log should be activate according to this
  * perhaps refer to logback file to get rollinng policy like specified in requirements
  ************************************************************************************/
-@Slf4j
 public final  class LogbackSupport {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LogbackSupport.class);
+
     private LogbackSupport() { }
 
     //kalles gjerne ved oppstart av container
     public static void outputLogbackConfig() {
-        LoggerContext lc = ((ch.qos.logback.classic.Logger) log).getLoggerContext();
+        LoggerContext lc = ((ch.qos.logback.classic.Logger) LOG).getLoggerContext();
         StatusPrinter.print(lc);
         lc.getStatusManager().getCopyOfStatusList().forEach(l ->
-                log.info("Logback: {}", l.getMessage())
+                LOG.info("Logback: {}", l.getMessage())
         );
-        log.info("INFO log test message");
-        log.debug("DEBUG log test message");
-        log.trace("TRACE log test message");
+        LOG.info("INFO log test message");
+        LOG.debug("DEBUG log test message");
+        LOG.trace("TRACE log test message");
     }
 }
 
