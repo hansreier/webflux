@@ -158,7 +158,7 @@ public class WebClientTest {
         LOG.info("errorJSON: {}", errorJSON);
         assertThat(errorJSON).contains("error");
     }
-
+    //Shows how error cause can be handled.
     @Test
     @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
     public void testUserEndpointBadUser2() {
@@ -168,8 +168,21 @@ public class WebClientTest {
                         .uri("/test/user").contentType(MediaType.valueOf(MediaType.APPLICATION_ATOM_XML_VALUE))
                         .accept(MediaType.APPLICATION_ATOM_XML)
                         .body(Mono.just(user), String.class)
-                        .exchange()
-                        .flatMap(clientResponse -> clientResponse.bodyToMono(String.class));
+                        .exchangeToMono(response -> {
+                            if (response.statusCode().equals(HttpStatus.OK)) {
+                                return response.bodyToMono(String.class);
+                            } else {
+                                LOG.error("HttpResponse {}", response.statusCode());
+                                return response.bodyToMono(String.class);
+                                //create exception that need to be handled in msg.block();
+                                //return response.createException().flatMap(Mono::error);
+                                //Simply return message string
+                                //return Mono.just("error");
+                            }
+                        });
+        String error = msg.block();
+        LOG.info("error: {}", error);
+        assertThat(error).contains("error");
 
         LOG.info("Call done");
     }
