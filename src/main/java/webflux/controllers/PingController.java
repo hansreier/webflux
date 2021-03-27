@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import webflux.service.FileService;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 
 @RestController
@@ -115,6 +116,19 @@ public class PingController {
         Flux<Integer> result = filePartMono.flatMapMany(fileService::uploadToDisk);
         LOG.info("file upload to disk on server completed");
         return result;
+    }
+
+    @PostMapping(value = "/uploadToDb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.OK)
+    public void uploadToDb(@RequestPart("file") Mono<FilePart> filePartMono) {
+        LOG.info("inside upload to db");
+        filePartMono.subscribe(filePart -> {
+            LOG.info("inside filePart");
+            byte[] bytes = fileService.byteArray(filePart);
+            LOG.info("subscribed");
+            LOG.info("lest:" + new String(bytes));
+        });
     }
 }
 

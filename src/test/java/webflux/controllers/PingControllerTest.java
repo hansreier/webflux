@@ -160,6 +160,41 @@ public class PingControllerTest {
     }
 
     @Test
+    public void testDBFileUpload() {
+        LOG.info("Test web client for file upload started");
+        String fileName = "Betaling.txt";
+        //String fileName = "reier97.jpg";
+        File file = new File(RESOURCE_DIR + fileName);
+                webTestClient.post()
+                        .uri("/test/uploadToDb")
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .body(BodyInserters.fromMultipartData(fromFile(file)))
+                        .exchange()
+                        .expectStatus().isOk()
+                        .returnResult(String.class).getResponseBody();
+        LOG.info("completed");
+    }
+
+    @Test
+    public void testDBUploadFileGenerated() throws Exception {
+        LOG.info("Test web client for file upload started");
+        String fileName = RESOURCE_DIR + "BetalingGen.txt";
+        fileUtilities.generateFile(fileName, FILE_TEXT, 5000);
+        LOG.info("File generated");
+        File file = new File(fileName);
+        LOG.info("Fil lengde:"+ file.length());
+        webTestClient.post()
+                .uri("/test/uploadToDb")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(fromFile(file)))
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(String.class).getResponseBody();
+        LOG.info("Completed");
+    }
+
+
+    @Test
     @Disabled
     public void testFileGenerated() throws Exception {
         int kBytes = 200000;

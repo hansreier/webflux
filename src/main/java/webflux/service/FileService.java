@@ -7,7 +7,9 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,6 +51,28 @@ public class FileService {
             return read;
         });
         return dBuffer;
+    }
+
+    public byte[] byteArray(FilePart x) {
+        LOG.info("Upload and return contents in Flux<String>");
+        Mono<java.util.List<byte[]>> byteList;
+        byteList = x.content().flatMap(dataBuffer -> Flux.just(dataBuffer.asByteBuffer().array()))
+                .collectList();
+        LOG.info("ByteList collected");
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        byteList.subscribe(e -> {
+            LOG.info("Inside doOnNext");
+            e.forEach(bytes -> {
+                LOG.info("Inside foreach");
+                try {
+                    byteStream.write(bytes);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            });
+        });
+        LOG.info("byteStream written");
+        return byteStream.toByteArray();
     }
 
     public Flux<Integer> uploadToDisk(FilePart x) {
