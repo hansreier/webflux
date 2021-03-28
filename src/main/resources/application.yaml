@@ -11,7 +11,7 @@ server:
   error:
     include-exception: true
     include-message: ALWAYS
-    include-stacktrace: NEVER
+    include-stacktrace: ALWAYS
 logging:
   logback:
     rollingpolicy:
@@ -26,6 +26,7 @@ logging:
   level:
     org.springframework: INFO
     webflux: INFO
+    io.rdbc.postgresql: INFO
 
 app:
   files: "files"

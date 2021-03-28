@@ -62,6 +62,7 @@ public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
             ServerRequest request) {
         LOG.info("Inside error handler server response");
         String stack = includeStacktrace;
+        boolean stackTraceIncluded = false;
         // Defaults are empty for some reason, read manually from config
         // ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
         // ErrorAttributeOptions options = ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE,
@@ -72,14 +73,20 @@ public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
         }
         if (includeStacktrace.equalsIgnoreCase("always")) {
             incl.add(ErrorAttributeOptions.Include.STACK_TRACE);
+            stackTraceIncluded = true;
         }
         ErrorAttributeOptions options = ErrorAttributeOptions.of(incl);
         Map<String, Object> errorPropertiesMap = getErrorAttributes(request,
                 options);
         HttpStatus httpStatus = HttpStatus.valueOf((int) errorPropertiesMap.get("status"));
-        LOG.error("HttpStatus {}: {}", httpStatus, errorPropertiesMap.get("message"));
+        String path = errorPropertiesMap.get("path").toString();
+        String message = errorPropertiesMap.get("message").toString();
+        LOG.error("Error at: {} HttpStatus: {} Message: {}", path, httpStatus, message);
+        if (stackTraceIncluded) {
+            LOG.error("Detailed error message: \n {}", errorPropertiesMap.get("trace"));
+        }
         return ServerResponse.status(httpStatus)
-                .contentType(MediaType.APPLICATION_JSON) //Why is only JSON supported?
+               // .contentType(MediaType.APPLICATION_JSON) //Why is only JSON supported?
                 .body(BodyInserters.fromValue(errorPropertiesMap));
     }
 }

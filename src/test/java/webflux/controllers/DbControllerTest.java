@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +17,18 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import webflux.config.AppTestConfig;
 import webflux.domain.Document;
 
-//@ContextConfiguration(classes = AppTestConfig.class)
+@ContextConfiguration(classes = AppTestConfig.class)
 @WebFluxTest(controllers = DbController.class)
 @AutoConfigureWebTestClient(timeout = "360000")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ActiveProfiles("h2")
 @Rollback(false)
 public class DbControllerTest {
 
@@ -37,7 +36,6 @@ public class DbControllerTest {
 
     private static final int NO_FILES = 1;
     private static final int KBYTES_SMALL = 50;
-
 
     @Autowired
     private WebTestClient webTestClient;
@@ -47,7 +45,6 @@ public class DbControllerTest {
         generateFile(KBYTES_SMALL);
         generateFiles(KBYTES_SMALL, NO_FILES);
     }
-
 
     @Test
     @Order(1)
@@ -59,7 +56,7 @@ public class DbControllerTest {
             document.setCreated(LocalDateTime.now());
             document.setDocumentType("Test");
             Flux<Document> savedDocuments =
-                    webTestClient.post().uri("/doc/create")
+                    webTestClient.post().uri("/db/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .body(Mono.just(document), Document.class)
                             .exchange()
@@ -76,7 +73,6 @@ public class DbControllerTest {
 
     @Test
     @Order(2)
-    @EnabledIfEnvironmentVariable(named = "itest", matches = "yes")
     public void testUpdateAndReadDocument() throws IOException {
         String fileName = RESOURCE_DIR + "BetalingGen.txt";
         generateFile(fileName, FILE_TEXT, KBYTES_SMALL);
@@ -86,7 +82,7 @@ public class DbControllerTest {
         document.setDocumentKey(1L);
         document.setDocument(docBytes);
         Flux<Document> savedDocument =
-                webTestClient.post().uri("/doc/create")
+                webTestClient.post().uri("/db/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Mono.just(document), Document.class)
                         .exchange()
@@ -98,7 +94,7 @@ public class DbControllerTest {
         LOG.info("Read document");
         int id = 1;
         Flux<Document> result =
-                webTestClient.get().uri("/doc/" + id)
+                webTestClient.get().uri("/db/" + id)
                         .exchange()
                         .expectStatus().isOk()
                         .returnResult(Document.class).getResponseBody();
@@ -114,7 +110,6 @@ public class DbControllerTest {
 
     @Test
     @Order(2)
-    @EnabledIfEnvironmentVariable(named = "itest", matches = "yes")
     public void testUpdateDocument() {
         LOG.info("Update document test");
         Document document = new Document();
@@ -122,7 +117,7 @@ public class DbControllerTest {
         document.setCreated(LocalDateTime.now());
         document.setDocumentType("Test");
         Flux<Document> savedDocument =
-                webTestClient.post().uri("/doc/create")
+                webTestClient.post().uri("/db/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Mono.just(document), Document.class)
                         .exchange()
@@ -135,12 +130,11 @@ public class DbControllerTest {
 
     @Test
     @Order(3)
-    @EnabledIfEnvironmentVariable(named = "itest", matches = "yes")
     public void testDeleteDocument() {
         LOG.info("Delete document instance test");
         int id = 2;
         Flux<Object> result =
-                webTestClient.delete().uri("/meta/delete/" + id)
+                webTestClient.delete().uri("/db/delete/" + id)
                         .exchange()
                         .expectStatus().isOk()
                         .returnResult(Object.class).getResponseBody();
@@ -150,11 +144,10 @@ public class DbControllerTest {
 
     @Test
     @Order(4)
-    @EnabledIfEnvironmentVariable(named = "itest", matches = "yes")
     public void readAllDocuments() {
         LOG.info("Read all documents test");
         Flux<Document> savedDocuments =
-                webTestClient.get().uri("/meta/all")
+                webTestClient.get().uri("/db/all")
                         .exchange()
                         .expectStatus().isOk()
                         .returnResult(Document.class).getResponseBody();
