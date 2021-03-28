@@ -1,4 +1,4 @@
-package webflux.controllers;
+package webflux.controller;
 
 
 import static org.assertj.core.api.Assertions.assertThat;

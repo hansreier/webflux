@@ -1,11 +1,12 @@
-package webflux.controllers;
+package webflux.controller;
 
-import static webflux.controllers.PingController.TEST_MESSAGE;
+import static webflux.controller.PingController.TEST_MESSAGE;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static webflux.controllers.PingController.USER_ID_PREFIX;
+import static webflux.controller.PingController.USER_ID_PREFIX;
 import static webflux.util.FileUtilities.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -55,13 +56,13 @@ public class WebClientTest {
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testApplicationContext() {
         utilities.printBeans();
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testMonoEndpoint() {
         Mono<String> msg = webClient.get()
                 .uri("/test/mono")
@@ -75,7 +76,7 @@ public class WebClientTest {
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testFluxEndpoint() {
         Flux<String> msg = webClient.get()
                 .uri("/test/flux")
@@ -89,7 +90,7 @@ public class WebClientTest {
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testWebClient() {
         LOG.info("testWebClient started");
         Flux<String> msg = webClient.get()
@@ -104,7 +105,7 @@ public class WebClientTest {
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testUserEndpoint() {
         String user = "Reier";
         Mono<String> msg =
@@ -124,6 +125,7 @@ public class WebClientTest {
     }
 
     @Test
+    @Disabled
     //Surprisingly this returns 400, picked up directly by server error handler.
     public void testUserEndpointEmptyUser() {
         String user = "";
@@ -141,6 +143,7 @@ public class WebClientTest {
     }
 
     @Test
+    @Disabled
     //All users starting with Hans are denied
     //The problem here is that the actual error cause is not really picked up
     public void testUserEndpointBadUser() {
@@ -159,7 +162,7 @@ public class WebClientTest {
     }
     //Shows how error cause can be handled.
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testUserEndpointBadUser2() {
         String user = "Hans Reier";
         Mono<String> msg =
@@ -187,7 +190,7 @@ public class WebClientTest {
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testFileUpload() {
         LOG.info("Test web client for file upload started");
         String fileName = "Betaling.txt";
@@ -207,7 +210,7 @@ public class WebClientTest {
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "spring.profiles.active", matches = "(ITEST)")
+    @Disabled
     public void testFileSaveGeneratedUpload() throws Exception {
         int kBytes = 12000; // 2000000
         LOG.info("Test web client for file upload started");

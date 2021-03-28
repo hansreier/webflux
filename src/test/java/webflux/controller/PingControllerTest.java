@@ -1,4 +1,4 @@
-package webflux.controllers;
+package webflux.controller;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
@@ -24,7 +23,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import webflux.config.AppConfig;
 import webflux.config.AppTestConfig;
 import webflux.logback.LogbackSupport;
 import webflux.logback.LogbackTestSupport;
@@ -34,8 +32,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static webflux.controllers.PingController.TEST_MESSAGE;
-import static webflux.controllers.PingController.USER_ID_PREFIX;
+import static webflux.controller.PingController.TEST_MESSAGE;
+import static webflux.controller.PingController.USER_ID_PREFIX;
 import static webflux.util.FileUtilities.*;
 
 //@DirtiesContext ??? recreate context for every method

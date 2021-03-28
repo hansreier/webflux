@@ -1,4 +1,4 @@
-package webflux.controllers;
+package webflux.controller;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
