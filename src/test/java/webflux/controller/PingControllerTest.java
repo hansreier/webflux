@@ -51,9 +51,6 @@ public class PingControllerTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    @Autowired
-    private FileUtilities fileUtilities;
-
     @BeforeAll
     private static void startup() throws Exception {
         generateFile(KBYTES);
@@ -186,7 +183,7 @@ public class PingControllerTest {
     public void testDBUploadFileGenerated() throws Exception {
         LOG.info("Test web client for file upload started");
         String fileName = RESOURCE_DIR + "BetalingGen.txt";
-        fileUtilities.generateFile(fileName, FILE_TEXT, 20);
+        FileUtilities.generateFile(fileName, FILE_TEXT, 20);
         LOG.info("File generated");
         File file = new File(fileName);
         LOG.info("Fil lengde:"+ file.length());
@@ -209,7 +206,7 @@ public class PingControllerTest {
         int kBytes = 200000;
         LOG.info("Test web client for file upload started");
         String fileName = RESOURCE_DIR + "BetalingGen.txt";
-        fileUtilities.generateFile(fileName, FILE_TEXT, kBytes);
+        FileUtilities.generateFile(fileName, FILE_TEXT, kBytes);
         LOG.info("File generated");
     }
 
@@ -217,7 +214,7 @@ public class PingControllerTest {
     public void testFileGeneratedUpload() throws Exception {
         LOG.info("Test web client for file upload started");
         String fileName = RESOURCE_DIR + "BetalingGen.txt";
-        fileUtilities.generateFile(fileName, FILE_TEXT, KBYTES);
+        FileUtilities.generateFile(fileName, FILE_TEXT, KBYTES);
         LOG.info("File generated");
         File file = new File(fileName);
         Flux<String> text =
@@ -256,7 +253,7 @@ public class PingControllerTest {
     public void testFileSaveGeneratedUpload() throws Exception {
         int kBytes = KBYTES;
         String fileName = RESOURCE_DIR + "BetalingGen.txt";
-        fileUtilities.generateFile(fileName, FILE_TEXT, kBytes);
+        FileUtilities.generateFile(fileName, FILE_TEXT, kBytes);
         File file = new File(fileName);
         Flux<Integer> response =
                 webTestClient.post()
@@ -278,7 +275,7 @@ public class PingControllerTest {
         for (int i = 0; i < NO_FILES; i++) {
             LOG.info("Test web client for file upload started");
             String fileName = RESOURCE_DIR + "BetalingGen" + i + ".txt";
-            fileUtilities.generateFile(fileName, FILES_TEXT + String.format("%5d", i) + " viser bytes ", kBytes);
+            FileUtilities.generateFile(fileName, FILES_TEXT + String.format("%5d", i) + " viser bytes ", kBytes);
         }
         LOG.info("{} Files generated", NO_FILES);
     }
