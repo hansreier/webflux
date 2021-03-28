@@ -2,7 +2,6 @@ package webflux.controllers;
 
 import static webflux.controllers.PingController.TEST_MESSAGE;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -213,7 +212,7 @@ public class WebClientTest {
         int kBytes = 12000; // 2000000
         LOG.info("Test web client for file upload started");
         String fileName = RESOURCE_DIR + "BetalingGen.txt";
-        fileUtilities.generateFile(fileName, FILE_TEXT, kBytes);
+        generateFile(fileName, FILE_TEXT, kBytes);
         File file = new File(fileName);
         Flux<Integer> msg =
                 webClient.post()

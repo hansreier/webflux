@@ -65,6 +65,7 @@ public class FileService {
             e.forEach(bytes -> {
                 LOG.info("Inside foreach");
                 try {
+                    LOG.info("writing {}", bytes.length);
                     byteStream.write(bytes);
                 } catch (IOException ioException) {
                     ioException.printStackTrace();

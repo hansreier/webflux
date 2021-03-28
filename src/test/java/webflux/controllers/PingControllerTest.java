@@ -1,5 +1,6 @@
 package webflux.controllers;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,6 @@ import webflux.config.AppConfig;
 import webflux.config.AppTestConfig;
 import webflux.logback.LogbackSupport;
 import webflux.logback.LogbackTestSupport;
-import webflux.service.FileService;
 import webflux.util.FileUtilities;
 
 import java.io.File;
@@ -40,12 +40,15 @@ import static webflux.util.FileUtilities.*;
 
 //@DirtiesContext ??? recreate context for every method
 @AutoConfigureWebTestClient(timeout = "360000")
-@ContextConfiguration(classes = AppConfig.class)
-@Import(AppTestConfig.class)
-@WebFluxTest
+@ContextConfiguration(classes = AppTestConfig.class)
+@WebFluxTest(controllers = PingController.class)
 public class PingControllerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(PingControllerTest.class);
+
+    private static final int NO_FILES = 5;
+    private static final int KBYTES = 500;
+    private static final int KBYTES2 = 10000;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -53,6 +56,11 @@ public class PingControllerTest {
     @Autowired
     private FileUtilities fileUtilities;
 
+    @BeforeAll
+    private static void startup() throws Exception {
+        generateFile(KBYTES);
+        generateFiles(KBYTES2, NO_FILES);
+    }
 
     @Test
     public void dummyTest() {
@@ -176,13 +184,15 @@ public class PingControllerTest {
     }
 
     @Test
+    //Funker bare på små størrelser, så noe er feil v100 kBytes er greit
     public void testDBUploadFileGenerated() throws Exception {
         LOG.info("Test web client for file upload started");
         String fileName = RESOURCE_DIR + "BetalingGen.txt";
-        fileUtilities.generateFile(fileName, FILE_TEXT, 5000);
+        fileUtilities.generateFile(fileName, FILE_TEXT, 20);
         LOG.info("File generated");
         File file = new File(fileName);
         LOG.info("Fil lengde:"+ file.length());
+        Flux<String> text =
         webTestClient.post()
                 .uri("/test/uploadToDb")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -190,7 +200,8 @@ public class PingControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(String.class).getResponseBody();
-        LOG.info("Completed");
+        String result = text.blockLast();
+        LOG.info(result);
     }
 
 

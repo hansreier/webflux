@@ -118,10 +118,12 @@ public class PingController {
         return result;
     }
 
+    /*
+
     @PostMapping(value = "/uploadToDb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.OK)
-    public void uploadToDb(@RequestPart("file") Mono<FilePart> filePartMono) {
+    public Flux<String> uploadToDb(@RequestPart("file") Mono<FilePart> filePartMono) {
         LOG.info("inside upload to db");
         filePartMono.subscribe(filePart -> {
             LOG.info("inside filePart");
@@ -129,7 +131,11 @@ public class PingController {
             LOG.info("subscribed");
             LOG.info("lest:" + new String(bytes));
         });
+       // filePartMono.block();
     }
+
+    */
+
 }
 
 
