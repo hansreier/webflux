@@ -28,22 +28,22 @@ public class DbController {
 
     @GetMapping("all")
     public Flux<Document> getAll() {
-        LOG.info("Getting all document metadata");
+        LOG.info("Getting all documents");
         return this.documentService.getAllDocuments();
     }
 
     @GetMapping("{id}")
-    public Mono<ResponseEntity<Document>> getDocumentMetadataById(@PathVariable long id) {
-        LOG.info("Getting document metadata id: {}", id);
+    public Mono<ResponseEntity<Document>> getDocumentById(@PathVariable long id) {
+        LOG.info("Getting document id: {}", id);
         return this.documentService.getDocumentById(id)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/create")
-    public Mono<Document> createDocumentMetadata(@RequestBody Mono<Document> documenMetadataMono) {
-        LOG.info("Insert (update if existing id) metadata instance");
-        return documenMetadataMono.flatMap(this.documentService::createDocument);
+    public Mono<Document> createDocument(@RequestBody Mono<Document> documentMono) {
+        LOG.info("Insert (update if existing id) document instance");
+        return documentMono.flatMap(this.documentService::createDocument);
     }
 
     /*
@@ -55,8 +55,8 @@ public class DbController {
     */
 
     @DeleteMapping("/delete/{id}")
-    public Mono<Void> deleteDocumentMetadata(@PathVariable int id) {
-        LOG.info("Deleting document metadata instance with id: {}", id);
+    public Mono<Void> deleteDocument(@PathVariable int id) {
+        LOG.info("Deleting document instance with id: {}", id);
         return this.documentService.deleteDocument(id);
     }
 }

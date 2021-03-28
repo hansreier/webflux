@@ -118,7 +118,6 @@ public class PingController {
         return result;
     }
 
-    /*
 
     @PostMapping(value = "/uploadToDb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -132,9 +131,9 @@ public class PingController {
             LOG.info("lest:" + new String(bytes));
         });
        // filePartMono.block();
+        return null;
     }
 
-    */
 
 }
 
