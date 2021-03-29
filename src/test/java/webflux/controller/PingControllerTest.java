@@ -53,8 +53,8 @@ public class PingControllerTest {
 
     @BeforeAll
     private static void startup() throws Exception {
-        generateFile(KBYTES);
-        generateFiles(KBYTES2, NO_FILES);
+      //  generateFile(KBYTES);
+      //  generateFiles(KBYTES2, NO_FILES);
     }
 
     @Test
@@ -169,7 +169,7 @@ public class PingControllerTest {
         //String fileName = "reier97.jpg";
         File file = new File(RESOURCE_DIR + fileName);
                 webTestClient.post()
-                        .uri("/test/uploadToDb")
+                        .uri("/db/uploadToDb")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .body(BodyInserters.fromMultipartData(fromFile(file)))
                         .exchange()

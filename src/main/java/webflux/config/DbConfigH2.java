@@ -58,6 +58,7 @@ public class DbConfigH2 extends AbstractR2dbcConfiguration {
         return new H2ConnectionFactory(
 
                 H2ConnectionConfiguration.builder()
+                       // .file("testdb")
                         .inMemory(dbname)
                         .property(H2ConnectionOption.DB_CLOSE_DELAY, dbCloseDelay)
                         .property(H2ConnectionOption.DB_CLOSE_ON_EXIT, dbCloseOnExit)

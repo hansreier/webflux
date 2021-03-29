@@ -10,6 +10,8 @@ import reactor.core.publisher.Mono;
 import webflux.domain.Document;
 import webflux.repository.DocumentRepository;
 
+import java.time.LocalDateTime;
+
 @Service
 @Transactional
 public class DocumentService {
@@ -28,20 +30,20 @@ public class DocumentService {
     }
 
     public Mono<Document> createDocument(final Document document) {
+        LOG.info("Save document in database");
         return this.repository.save(document);
     }
 
-    /*
-    public Mono<DocumentMetadata> updateDocumentMetadata(int productId, final Mono<DocumentMetadata> productMono) {
-        return this.repository.findById(productId)
-            .flatMap(p -> productMono.map(u -> {
-                p.setDescription(u.getDescription());
-                p.setPrice(u.getPrice());
+    public Mono<Document> updateDocument(long documentId, final Mono<Document> documentMono) {
+        return this.repository.findById(documentId)
+            .flatMap(p -> documentMono.map(u -> {
+                p.setComment(u.getComment());
+                p.setDocumentType((u.getDocumentType()));
+                p.setModified(LocalDateTime.now());
                 return p;
             }))
             .flatMap(p -> this.repository.save(p));
     }
-    */
 
     public Mono<Void> deleteDocument(final long id) {
         //LOG.info("Inside deleteDocument service");

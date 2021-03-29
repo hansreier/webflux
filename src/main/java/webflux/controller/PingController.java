@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import webflux.domain.Document;
 import webflux.service.FileService;
 
 import java.time.Duration;
@@ -116,24 +117,6 @@ public class PingController {
         LOG.info("file upload to disk on server completed");
         return result;
     }
-
-
-    @PostMapping(value = "/uploadToDb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = HttpStatus.OK)
-    public Flux<String> uploadToDb(@RequestPart("file") Mono<FilePart> filePartMono) {
-        LOG.info("inside upload to db");
-        filePartMono.subscribe(filePart -> {
-            LOG.info("inside filePart");
-            byte[] bytes = fileService.byteArray(filePart);
-            LOG.info("subscribed");
-            LOG.info("lest:" + new String(bytes));
-        });
-       // filePartMono.block();
-        return null;
-    }
-
-
 }
 
 

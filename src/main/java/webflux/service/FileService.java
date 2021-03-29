@@ -8,6 +8,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import webflux.domain.Document;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -17,6 +18,7 @@ import java.nio.channels.AsynchronousFileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*********************'
@@ -53,27 +55,32 @@ public class FileService {
         return dBuffer;
     }
 
-    public byte[] byteArray(FilePart x) {
-        LOG.info("Upload and return contents in Flux<String>");
+    /*
+     *  Upload file and return entire contents in Mono.
+     *  Note: Entire contents stored in memory
+     */
+    public Mono<Document> uploadToMono(FilePart x) {
+        LOG.info("Upload file and return contents in Mono<Document>");
         Mono<java.util.List<byte[]>> byteList;
         byteList = x.content().flatMap(dataBuffer -> Flux.just(dataBuffer.asByteBuffer().array()))
                 .collectList();
-        LOG.info("ByteList collected");
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         byteList.subscribe(e -> {
-            LOG.info("Inside doOnNext");
             e.forEach(bytes -> {
-                LOG.info("Inside foreach");
                 try {
-                    LOG.info("writing {}", bytes.length);
+                    LOG.trace("writing {} {}", bytes.length, new String(bytes, StandardCharsets.UTF_8));
                     byteStream.write(bytes);
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    ioException.printStackTrace(); //TODO: Not acceptable code
                 }
             });
         });
-        LOG.info("byteStream written");
-        return byteStream.toByteArray();
+        Document doc = new Document();
+        doc.setCreated(LocalDateTime.now());
+        byte[] bytes = byteStream.toByteArray();
+        LOG.info("length of bytes array {}", bytes.length);
+        doc.setDocument(bytes);
+        return Mono.just(doc);
     }
 
     public Flux<Integer> uploadToDisk(FilePart x) {
@@ -102,7 +109,7 @@ public class FileService {
 
                 // get the current write offset and increment by the buffer size
                 final int filePartOffset = fileWriteOffset.getAndAdd(size);
-                LOG.debug("processing file part at Roffset {}", filePartOffset);
+                LOG.debug("processing file part at offset {}", filePartOffset);
                 // write the buffer to disk
                 channel.write(byteBuffer, filePartOffset);
                 return filePartOffset + size;
