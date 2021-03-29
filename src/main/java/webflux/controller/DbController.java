@@ -69,7 +69,7 @@ public class DbController {
         LOG.info("inside upload to db");
         return filePartMono.flatMap(filePart -> {
             Mono<Document> doc = fileService.uploadToMono(filePart);
-             return doc.flatMap(this.documentService::createDocument);
+            return doc.flatMap(this.documentService::createDocument);
            // return doc; skips db storage
         });
     }

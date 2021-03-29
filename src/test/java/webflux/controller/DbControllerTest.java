@@ -41,7 +41,7 @@ public class DbControllerTest {
     private static final Logger LOG = LoggerFactory.getLogger(DbControllerTest.class);
 
     private static final int NO_FILES = 1;
-    private static final int KBYTES_SMALL = 400;
+    private static final int KBYTES_SMALL = 1900;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -106,11 +106,11 @@ public class DbControllerTest {
                         .returnResult(Document.class).getResponseBody();
         Document read = result.blockLast();
         assertThat(read).isNotNull();
-        LOG.info("Document read {}", read.getDocumentKey());
+        LOG.info("Document read key: {}", read.getDocumentKey());
         byte[] content = read.getDocument();
         assertThat(content).isEqualTo(docBytes);
         String text = new String(content, StandardCharsets.UTF_8);
-        LOG.info("Document contents {}", text);
+        LOG.info("Document contents: {}", text);
     }
 
 

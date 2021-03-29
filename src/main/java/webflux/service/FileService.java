@@ -62,19 +62,24 @@ public class FileService {
     public Mono<Document> uploadToMono(FilePart x) {
         LOG.info("Upload file and return contents in Mono<Document>");
         Mono<java.util.List<byte[]>> byteList;
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         byteList = x.content().flatMap(dataBuffer -> Flux.just(dataBuffer.asByteBuffer().array()))
                 .collectList();
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+       // byteList.subscribe(e -> LOG.info("subscribed"));
+        LOG.info("Before subscribe");
+        //Problem is that does not wait long enough for action to complete so have to block
         byteList.subscribe(e -> {
+            LOG.info("Inside subscribe");
             e.forEach(bytes -> {
                 try {
-                    LOG.trace("writing {} {}", bytes.length, new String(bytes, StandardCharsets.UTF_8));
+                    LOG.info("writing {} {}", bytes.length, new String(bytes, StandardCharsets.UTF_8));
                     byteStream.write(bytes);
                 } catch (IOException ioException) {
                     ioException.printStackTrace(); //TODO: Not acceptable code
                 }
             });
         });
+        byteList.block();
         Document doc = new Document();
         doc.setCreated(LocalDateTime.now());
         byte[] bytes = byteStream.toByteArray();
