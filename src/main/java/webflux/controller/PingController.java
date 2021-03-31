@@ -4,9 +4,7 @@ import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -30,9 +28,6 @@ public class PingController {
     public static final String TEST_MESSAGE = WELCOME + TO + PEPPOL + PAYMENT + INTEGRASJON;
     public static final String USER_ID_PREFIX = "skatt";
     public static final int RANDOM_UPPER_LIMIT = 100;
-
-    @Autowired
-    private FileService fileService;
 
     @GetMapping(path = "/mono")
     public Mono<String> getMono() {
@@ -92,27 +87,6 @@ public class PingController {
         //    msg = Mono.error(e);
         // }
         return msg;
-    }
-
-    //upload and return file content in Flux<String>
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = HttpStatus.OK)
-    public Flux<String> upload(@RequestPart("file") Mono<FilePart> filePartMono) {
-        Flux<String> result = filePartMono.flatMapMany(fileService::upload);
-        LOG.info("file upload to server completed");
-        return result;
-    }
-
-    //Upload and save to disk, bytes written is returned in Flux<Integer>
-    @PostMapping(value = "/uploadToDisk", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = HttpStatus.OK)
-    public Flux<Integer> uploadToDisk(@RequestPart("file") Mono<FilePart> filePartMono) {
-        LOG.info("inside upload to disk");
-        Flux<Integer> result = filePartMono.flatMapMany(fileService::uploadToDisk);
-        LOG.info("file upload to disk on server completed");
-        return result;
     }
 }
 
