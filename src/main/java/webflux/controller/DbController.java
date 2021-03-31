@@ -62,7 +62,7 @@ public class DbController {
         return this.documentService.deleteDocument(id);
     }
 
-    @PostMapping(value = "/uploadToDb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.OK)
     public Mono<Document> uploadToDb(@RequestPart("file") Mono<FilePart> filePartMono) {

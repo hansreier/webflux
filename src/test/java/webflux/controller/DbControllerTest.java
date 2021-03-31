@@ -157,7 +157,7 @@ public class DbControllerTest {
         File file = new File(fileName);
         Flux<Document> savedDocument =
                 webTestClient.post()
-                        .uri("/db/uploadToDb")
+                        .uri("/db/upload")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .body(BodyInserters.fromMultipartData(fromFile(file)))
                         .exchange()

@@ -169,7 +169,7 @@ public class PingControllerTest {
         //String fileName = "reier97.jpg";
         File file = new File(RESOURCE_DIR + fileName);
                 webTestClient.post()
-                        .uri("/db/uploadToDb")
+                        .uri("/db/upload")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .body(BodyInserters.fromMultipartData(fromFile(file)))
                         .exchange()
@@ -189,7 +189,7 @@ public class PingControllerTest {
         LOG.info("Fil lengde:"+ file.length());
         Flux<String> text =
         webTestClient.post()
-                .uri("/test/uploadToDb")
+                .uri("/test/upload")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(fromFile(file)))
                 .exchange()
