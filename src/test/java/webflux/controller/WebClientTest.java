@@ -62,8 +62,7 @@ public class WebClientTest {
     }
 
     @Test
-    @Disabled
-    public void testMonoEndpoint() {
+    public void ITMonoEndpoint() {
         Mono<String> msg = webClient.get()
                 .uri("/test/mono")
                 .accept(MediaType.APPLICATION_XML)
@@ -76,8 +75,7 @@ public class WebClientTest {
     }
 
     @Test
-    @Disabled
-    public void testFluxEndpoint() {
+    public void ITFluxEndpoint() {
         Flux<String> msg = webClient.get()
                 .uri("/test/flux")
                 .accept(MediaType.APPLICATION_ATOM_XML)
@@ -91,7 +89,7 @@ public class WebClientTest {
 
     @Test
     @Disabled
-    public void testWebClient() {
+    public void itestWebClient() {
         LOG.info("testWebClient started");
         Flux<String> msg = webClient.get()
                 .uri("/test/webclient")

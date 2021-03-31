@@ -45,8 +45,8 @@ public class PingControllerTest {
     private static final Logger LOG = LoggerFactory.getLogger(PingControllerTest.class);
 
     private static final int NO_FILES = 5;
-    private static final int KBYTES = 500;
-    private static final int KBYTES2 = 10000;
+    private static final int KBYTES = 50;
+    private static final int KBYTES2 = 100;
 
     @Autowired
     private WebTestClient webTestClient;

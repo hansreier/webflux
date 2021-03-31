@@ -41,7 +41,7 @@ public class DbControllerTest {
     private static final Logger LOG = LoggerFactory.getLogger(DbControllerTest.class);
 
     private static final int NO_FILES = 1;
-    private static final int KBYTES_SMALL = 100;
+    private static final int KBYTES_SMALL = 10;
 
     @Autowired
     private WebTestClient webTestClient;
