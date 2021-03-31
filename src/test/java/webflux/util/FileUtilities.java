@@ -16,8 +16,8 @@ public class FileUtilities {
 
     public static final int THOUSAND = 1000;
     public static String RESOURCE_DIR = "src/test/resources/";
-    public static String FILE_TEXT = "Velkommen til Skatteetaten. Na sendes regning via bankene med Peppol. Dette viser bytes ";
-    public static String FILES_TEXT = "Velkommen til Skatteetaten. Na sendes regning via bankene med Peppol. ";
+    public static String FILE_TEXT = "Velkommen til CiberExperis. Na sendes regningen for bredbånd i filen. Dette viser bytes ";
+    public static String FILES_TEXT = "Velkommen til CiberExperis. Nå sendes regninger for bredbånd i filen. ";
 
     public static void generateFile(String fileName, String lineText, int kBytes) throws IOException {
         LOG.info("Generate file:  {} kBytes: {} ", fileName, kBytes);
