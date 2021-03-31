@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import webflux.domain.Document;
 import webflux.service.FileService;
 
 import java.time.Duration;
@@ -30,9 +29,7 @@ public class PingController {
     public static final String PAYMENT = "Payment ";
     public static final String TEST_MESSAGE = WELCOME + TO + PEPPOL + PAYMENT + INTEGRASJON;
     public static final String USER_ID_PREFIX = "skatt";
-    public static final int LINE_FEED = 10;
     public static final int RANDOM_UPPER_LIMIT = 100;
-    private static final int HUNDRED = 100;
 
     @Autowired
     private FileService fileService;
