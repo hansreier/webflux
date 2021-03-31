@@ -61,7 +61,25 @@ public class DbController {
         LOG.info("Deleting document instance with id: {}", id);
         return this.documentService.deleteDocument(id);
     }
-
+/*
+*  Use multipart file upload first, then later save to database.
+*  the problem with this method is that have to block or else
+*  writing to db starts before file upload is completed.
+*
+*  The problem is caused by the R2DBC driver really
+*  that does not allow for streaming with Bytea, and
+*  large objects/clob/blob is not supported yet (that supports streaming).
+*
+*  The improved code should stream each multipart directly into the DB
+*  using large objects, but impossible. What is done here is collecting all
+*  multiparts into one single byte array in memory and then save in DB.
+*
+*  It must be verified if this method is any better than directly sending
+*  the bytes from client without using multipart file upload.
+*  Much simpler code when not using multipart file upload.
+*
+*  The other alternative method is to use streaming with JDBC but not the R2DBC driver.
+ */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.OK)
