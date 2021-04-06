@@ -74,8 +74,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <skipTests>false</skipTests>
+                    <!--useFile>false</useFile-->
+                    <trimStackTrace>false</trimStackTrace>
                     <excludes>
-                        <exclude>**/*IT*.java</exclude>
+                        <!--exclude>**/*.java</exclude-->
+                        <!--exclude>**/IT*.java</exclude-->
                     </excludes>
                 </configuration>
             </plugin>

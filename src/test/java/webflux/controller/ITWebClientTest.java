@@ -10,7 +10,6 @@ import static webflux.controller.PingController.USER_ID_PREFIX;
 import static webflux.util.FileUtilities.*;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,9 @@ import java.io.File;
 //@DirtiesContext ??? recreate context for every method
 @SpringBootTest
 @ContextConfiguration(classes = AppTestConfig.class)
-public class WebClientTest {
+public class ITWebClientTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WebClientTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ITWebClientTest.class);
 
     private WebClient webClient;
 
