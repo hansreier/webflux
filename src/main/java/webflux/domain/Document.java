@@ -3,8 +3,9 @@ package webflux.domain;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.time.LocalDateTime;
-
+@XmlRootElement(name="ReierObject")
 public class Document {
     @Id
     @Column("document_key")

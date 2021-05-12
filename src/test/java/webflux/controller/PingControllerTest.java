@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import webflux.config.AppTestConfig;
+import webflux.domain.Document;
 import webflux.logback.LogbackSupport;
 import webflux.logback.LogbackTestSupport;
 import webflux.util.FileUtilities;
@@ -52,8 +53,7 @@ public class PingControllerTest {
     private WebTestClient webTestClient;
 
     @BeforeAll
-    private static void startup() throws Exception {
-      //  generateFile(KBYTES);
+    private static void startup() throws Exception { generateFile(KBYTES);
       //  generateFiles(KBYTES2, NO_FILES);
     }
 
@@ -310,11 +310,34 @@ public class PingControllerTest {
         LOG.info("File upload completed kBytes: {}", kBytes);
     }
 
+    @Test
+    public void testSendXML() {
+        LOG.info("Test web client send XML");
+        Document savedDocument;
+        Document doc = new Document();
+        doc.setDocumentKey(1L);
+        Flux<Document> response =
+                webTestClient.post()
+                        .uri("/test/xml")
+                       // .contentType(MediaType.APPLICATION_XML)
+                        .contentType(MediaType.APPLICATION_XML)
+                        .accept(MediaType.APPLICATION_XML)
+                        .body(Mono.just(doc), Document.class)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .returnResult(Document.class).getResponseBody();
+        Document result = response.blockLast();
+        assertThat(result).isNotNull();
+        LOG.info("Document read key: {} comment: {}",result.getDocumentKey(), result.getComment());
+    }
+
     private MultiValueMap<String, HttpEntity<?>> fromFile(File file) {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", new FileSystemResource(file));
         return builder.build();
     }
+
+
 
 
 

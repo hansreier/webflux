@@ -5,10 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import webflux.domain.Document;
 import webflux.service.FileService;
 
 import java.time.Duration;
@@ -87,6 +89,18 @@ public class PingController {
         //    msg = Mono.error(e);
         // }
         return msg;
+    }
+
+    @PostMapping(value= "/xml",
+            consumes = MediaType.APPLICATION_XML_VALUE,
+            produces = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<Document> xmlDocument(@RequestBody Document document) {
+        LOG.info("inside xmlDocument");
+        document.setComment("Inni her");
+        LOG.info("document modified");
+        ResponseEntity<Document> doc = ResponseEntity.ok(document);
+        LOG.info("document respons");
+        return doc;
     }
 }
 
