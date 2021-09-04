@@ -96,7 +96,8 @@
                     <trimStackTrace>false</trimStackTrace>
                     <excludes>
                         <!--exclude>**/*.java</exclude-->
-                        <!--exclude>**/IT*.java</exclude-->
+                        <!-- required else integration teste are run when buiolding-->
+                        <exclude>**/IT*.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
