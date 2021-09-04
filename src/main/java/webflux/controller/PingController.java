@@ -3,7 +3,6 @@ package webflux.controller;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,19 +10,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import webflux.domain.Document;
-import webflux.service.FileService;
 
 import java.time.Duration;
 import java.util.Random;
+
 
 @RestController
 @RequestMapping("/test")
 public class PingController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PingController.class);
-
     public static final String WELCOME = "Welcome ";
-    public static final String MOCK ="Mock ";
+    public static final String MOCK = "Mock ";
     public static final String TO = "to ";
     public static final String PEPPOL = "Peppol ";
     public static final String INTEGRASJON = "Integrasjon ";
@@ -32,6 +29,7 @@ public class PingController {
     public static final String MOCK_MESSAGE = MOCK + TO + PEPPOL + PAYMENT + INTEGRASJON;
     public static final String USER_ID_PREFIX = "skatt";
     public static final int RANDOM_UPPER_LIMIT = 100;
+    private static final Logger LOG = LoggerFactory.getLogger(PingController.class);
 
     @GetMapping(path = "/mono")
     public Mono<String> getMono() {
@@ -76,12 +74,13 @@ public class PingController {
             throw new RuntimeException("Do not call me Hans");
         }
         Mono<String> msg;
-        LOG.debug("Inside saveUser");
+        LOG.info("Inside saveUser");
         Random rand = new Random();
         int uid = rand.nextInt(RANDOM_UPPER_LIMIT);
         String userId = USER_ID_PREFIX + user + uid;
-        msg = Mono.just(userId);
-        // Specific error handling can be added, not required.
+        msg = Mono.just(userId)
+                .log() //Internal logging
+                .doOnNext((e -> LOG.info("Value: {}", e))); //Logging of values inside Mono
         // try {
         // ...
         // .doOnError(throwable -> LOG.error("Failure", throwable))
@@ -93,7 +92,7 @@ public class PingController {
         return msg;
     }
 
-    @PostMapping(value= "/xml",
+    @PostMapping(value = "/xml",
             consumes = MediaType.APPLICATION_XML_VALUE,
             produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<Document> xmlDocument(@RequestBody Document document) {

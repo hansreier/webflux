@@ -1,5 +1,11 @@
 package webflux.controller;
 
+// Publish on/subscribe on.
+// https://zoltanaltfatter.com/2018/08/26/subscribeOn-publishOn-in-Reactor/
+// https://www.vinsguru.com/reactor-schedulers-publishon-vs-subscribeon/
+//https://spring.io/blog/2019/12/13/flight-of-the-flux-3-hopping-threads-and-schedulers
+//https://spring.io/blog/2019/12/13/flight-of-the-flux-3-hopping-threads-and-schedulers
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
