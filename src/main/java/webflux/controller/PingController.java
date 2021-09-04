@@ -23,11 +23,13 @@ public class PingController {
     private static final Logger LOG = LoggerFactory.getLogger(PingController.class);
 
     public static final String WELCOME = "Welcome ";
+    public static final String MOCK ="Mock ";
     public static final String TO = "to ";
     public static final String PEPPOL = "Peppol ";
     public static final String INTEGRASJON = "Integrasjon ";
     public static final String PAYMENT = "Payment ";
     public static final String TEST_MESSAGE = WELCOME + TO + PEPPOL + PAYMENT + INTEGRASJON;
+    public static final String MOCK_MESSAGE = MOCK + TO + PEPPOL + PAYMENT + INTEGRASJON;
     public static final String USER_ID_PREFIX = "skatt";
     public static final int RANDOM_UPPER_LIMIT = 100;
 

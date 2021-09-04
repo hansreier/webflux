@@ -1,15 +1,10 @@
 package webflux.controller;
 
-import static webflux.controller.PingController.TEST_MESSAGE;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static webflux.controller.PingController.USER_ID_PREFIX;
-import static webflux.util.FileUtilities.*;
-
-import org.junit.jupiter.api.BeforeEach;
+import org.mockserver.integration.ClientAndServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +14,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,6 +26,13 @@ import webflux.util.FileUtilities;
 import webflux.util.Utilities;
 
 import java.io.File;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static webflux.controller.PingController.*;
+import static webflux.util.FileUtilities.*;
 
 //@DirtiesContext ??? recreate context for every method
 @SpringBootTest
@@ -43,6 +43,8 @@ public class ITWebClientTest {
 
     private WebClient webClient;
 
+    private ClientAndServer mockServer;
+
     @Autowired
     private FileUtilities fileUtilities;
 
@@ -51,7 +53,15 @@ public class ITWebClientTest {
 
     @BeforeEach
     public void setWebClient() {
-        webClient = WebClient.create("http://localhost:8080");
+        mockServer = startClientAndServer(1080);
+        webClient = WebClient.create("http://localhost:1080");
+        LOG.info("After starting mockserver");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        mockServer.stop();
+        LOG.info("After stopping mockserver");
     }
 
     @Test
@@ -61,7 +71,7 @@ public class ITWebClientTest {
     }
 
     @Test
-    public void ITMonoEndpoint() {
+    public void testMonoEndpoint() {
         Mono<String> msg = webClient.get()
                 .uri("/test/mono")
                 .accept(MediaType.APPLICATION_XML)
@@ -74,7 +84,31 @@ public class ITWebClientTest {
     }
 
     @Test
-    public void ITFluxEndpoint() {
+    public void testMonoEndpointMocked() {
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/test/mono"))
+                .respond(response()
+                                .withStatusCode(200)
+                                .withBody(MOCK_MESSAGE)
+                        // .withDelay(TimeUnit.SECONDS, 1)
+                );
+        LOG.info("Mock is set up");
+        Mono<String> msg = webClient.get()
+                .uri("/test/mono")
+                .accept(MediaType.APPLICATION_XML)
+                .retrieve()
+                .bodyToMono(String.class).log();
+
+        StepVerifier.create(msg)
+                .expectNext(MOCK_MESSAGE)
+                .verifyComplete();
+    }
+
+    @Test
+    public void testFluxEndpoint() {
         Flux<String> msg = webClient.get()
                 .uri("/test/flux")
                 .accept(MediaType.APPLICATION_ATOM_XML)
@@ -88,7 +122,7 @@ public class ITWebClientTest {
 
     @Test
     @Disabled
-    public void itestWebClient() {
+    public void testWebClient() {
         LOG.info("testWebClient started");
         Flux<String> msg = webClient.get()
                 .uri("/test/webclient")
@@ -157,6 +191,7 @@ public class ITWebClientTest {
         LOG.info("errorJSON: {}", errorJSON);
         assertThat(errorJSON).contains("error");
     }
+
     //Shows how error cause can be handled.
     @Test
     @Disabled

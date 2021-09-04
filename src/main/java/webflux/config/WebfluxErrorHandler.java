@@ -67,13 +67,13 @@ public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
         // ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
         // ErrorAttributeOptions options = ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE,
         //    ErrorAttributeOptions.Include.STACK_TRACE);
-        List<ErrorAttributeOptions.Include> incl = new ArrayList<>();
+        List<ErrorAttributeOptions.Include> incl = new ArrayList<>();            stackTraceIncluded = true;
+
         if (includeMessage.equalsIgnoreCase("always")) {
             incl.add(ErrorAttributeOptions.Include.MESSAGE);
         }
         if (includeStacktrace.equalsIgnoreCase("always")) {
             incl.add(ErrorAttributeOptions.Include.STACK_TRACE);
-            stackTraceIncluded = true;
         }
         ErrorAttributeOptions options = ErrorAttributeOptions.of(incl);
         Map<String, Object> errorPropertiesMap = getErrorAttributes(request,
