@@ -3,7 +3,6 @@ package webflux.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -11,7 +10,6 @@ import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -33,21 +31,20 @@ import java.util.Map;
 @Order(-2)
 public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(WebfluxErrorHandler.class);
     @Value("${server.error.include-stacktrace:}")
     private String includeStacktrace;
-
     @Value("${server.error.include-message:}")
     private String includeMessage;
 
-    private static final Logger LOG = LoggerFactory.getLogger(WebfluxErrorHandler.class);
-
-    public WebfluxErrorHandler(ErrorAttributes errorAttributes,
-                               WebProperties.Resources resources,
-                               ApplicationContext applicationContext,
-                               ServerCodecConfigurer configurer) {
-        super(errorAttributes, resources, applicationContext);
-        super.setMessageWriters(configurer.getWriters());
-        super.setMessageReaders(configurer.getReaders());
+    /**
+     * Create a new {@code AbstractErrorWebExceptionHandler}.
+     */
+    public WebfluxErrorHandler(ErrorAttributes errorAttributes, ApplicationContext applicationContext,
+                               ServerCodecConfigurer serverCodecConfigurer) {
+        super(errorAttributes, new WebProperties.Resources(), applicationContext);
+        super.setMessageWriters(serverCodecConfigurer.getWriters());
+        super.setMessageReaders(serverCodecConfigurer.getReaders());
     }
 
     @Override
@@ -62,12 +59,12 @@ public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
             ServerRequest request) {
         LOG.info("Inside error handler server response");
         String stack = includeStacktrace;
-        boolean stackTraceIncluded = false;
         // Defaults are empty for some reason, read manually from config
         // ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
         // ErrorAttributeOptions options = ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE,
         //    ErrorAttributeOptions.Include.STACK_TRACE);
-        List<ErrorAttributeOptions.Include> incl = new ArrayList<>();            stackTraceIncluded = true;
+        List<ErrorAttributeOptions.Include> incl = new ArrayList<>();
+        boolean stackTraceIncluded = true;
 
         if (includeMessage.equalsIgnoreCase("always")) {
             incl.add(ErrorAttributeOptions.Include.MESSAGE);
@@ -86,7 +83,7 @@ public class WebfluxErrorHandler extends AbstractErrorWebExceptionHandler {
             LOG.error("Detailed error message: \n {}", errorPropertiesMap.get("trace"));
         }
         return ServerResponse.status(httpStatus)
-               // .contentType(MediaType.APPLICATION_JSON) //Why is only JSON supported?
+                // .contentType(MediaType.APPLICATION_JSON) //Why is only JSON supported?
                 .body(BodyInserters.fromValue(errorPropertiesMap));
     }
 }

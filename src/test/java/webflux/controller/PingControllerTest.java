@@ -5,6 +5,20 @@ package webflux.controller;
 // https://www.vinsguru.com/reactor-schedulers-publishon-vs-subscribeon/
 //https://spring.io/blog/2019/12/13/flight-of-the-flux-3-hopping-threads-and-schedulers
 //https://spring.io/blog/2019/12/13/flight-of-the-flux-3-hopping-threads-and-schedulers
+//https://www.baeldung.com/spring-webflux-concurrency e.g separate thread-bool for webclient.
+//https://developer.okta.com/blog/2021/08/13/reactive-java
+//How to call blocking code from reactive...
+//https://github.com/reactor/reactor-core/issues/1756
+//https://stackoverflow.com/questions/59566982/what-happens-in-webflux-if-a-single-synchronous-call-is-made
+//https://www.codingame.com/playgrounds/929/reactive-programming-with-reactor-3/BlockingToReactive
+//https://betterprogramming.pub/how-to-avoid-blocking-in-reactive-java-757ec7024676
+//https://projectreactor.io/docs/core/release/reference/#faq.wrap-blocking
+
+//From blocking to reactive.
+//https://www.codingame.com/playgrounds/929/reactive-programming-with-reactor-3/ReactiveToBlocking
+//Can use timeout with block...
+//Spring har også tast sceduler og @schedule
+//https://itnext.io/how-to-make-legacy-code-reactive-2debcb3d0a40
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -110,6 +124,44 @@ public class PingControllerTest {
         LOG.info("test start");
         Flux<String> msg = webTestClient.get()
                 .uri("/test/webclient")
+                .accept(MediaType.APPLICATION_ATOM_XML)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(String.class).getResponseBody()
+                .log();
+
+        StepVerifier.create(msg)
+                .expectNext(TEST_MESSAGE)
+                .verifyComplete();
+
+        LOG.info("test completed");
+    }
+
+    @Disabled
+    @Test
+    public void testWebClientBlockingEndpoint() {
+        LOG.info("test start");
+        Flux<String> msg = webTestClient.get()
+                .uri("/test/webclientBlocking")
+                .accept(MediaType.APPLICATION_ATOM_XML)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(String.class).getResponseBody()
+                .log();
+
+        StepVerifier.create(msg)
+                .expectNext(TEST_MESSAGE)
+                .verifyComplete();
+
+        LOG.info("test completed");
+    }
+
+    @Disabled
+    @Test
+    public void testWebClientBlockingEndpoint2() {
+        LOG.info("test start");
+        Flux<String> msg = webTestClient.get()
+                .uri("/test/webclientBlocking2")
                 .accept(MediaType.APPLICATION_ATOM_XML)
                 .exchange()
                 .expectStatus().isOk()
